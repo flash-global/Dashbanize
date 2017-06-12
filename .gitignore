@@ -1,0 +1,6 @@
+# Ignore Local Files
+*.local.php
+
+# Vendor dir
+vendor/
+
