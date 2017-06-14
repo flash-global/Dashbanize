@@ -1,3 +1,7 @@
+$(document).ready(function() {
+    myApp.hideAll();
+});
+
 var myApp = {}; //Déclaration namespace
 
 //Déclaration variables//
@@ -59,95 +63,100 @@ myApp.totalLog = 0;
 myApp.totalSize = 0;
 myApp.dataForVBarChart = [];
 
-
 //Fonctions//
 myApp.callAjax = function() {
     this.updateValues();
     this.showPage();
-    $.ajax({
-        type:'POST',
-        url:'ajax.php',
-        data: {
-            action: 'getTaskByBoard',
-            boardId: myApp.board,
-            fromdate : myApp.fromdate,
-            todate : myApp.todate
-        },
-        success: function (data) {
-            var result = $.parseJSON(data);
-            if (result['status'] == 'success') {
-                myApp.clearData();
-                console.log(result);
-                if (result['result'] == null) {
-                    $("#loader").css("display","none");
-                }
-                else {
-                    var tasks = result['result'];
-                    var longI = result['result'].length;
-                    for (var i = 0; i < longI; i++) {
-                        var longJ = tasks[i]['customfields'].length;
-                        for (var j = 0; j < longJ; j++) {
-                            if ((tasks[i]['customfields'][j]['name']) == 'Product Owner') {
-                                var productOwner = tasks[i]['customfields'][j]['value'];
-                            }
-                            else if ((tasks[i]['customfields'][j]['name']) == 'Allocated to') {
-                                var allocatedTo = tasks[i]['customfields'][j]['value'];
-                            }
-                        }
-                        if ((tasks[i]['size'] == null) || (tasks[i]['logedtime'] == null)) {
-                            var ratio = 0;
+
+        $.ajax({
+            type:'POST',
+            url:'ajax.php',
+            data: {
+                action: 'getTaskByBoard',
+                boardId: myApp.board,
+                fromdate : myApp.fromdate,
+                todate : myApp.todate
+            },
+            success: function (data) {
+                var result = $.parseJSON(data);
+
+                    if (result['status'] == 'success') {
+                        myApp.clearData();
+                        console.log(result);
+                        if (result['result'] == null) {
+                            $("#loader").css("display","none");
+                            myApp.hideAll();
                         }
                         else {
-                            var ratio = ((tasks[i]['logedtime']) / (tasks[i]['size']) * 100).toFixed(2);
-                            var donnees = [
-                                {
-                                    TaskID: tasks[i]['taskid'],
-                                    Title: tasks[i]['title'],
-                                    Assignee: tasks[i]['assignee'],
-                                    Column: tasks[i]['columnname'],
-                                    Lane: tasks[i]['lanename'],
-                                    Size: tasks[i]['size'],
-                                    TimeLogged: tasks[i]['logedtime'],
-                                    Producter: productOwner,
-                                    Allocated: allocatedTo,
-                                    Rapport: ratio
+                            var tasks = result['result'];
+                            var longI = result['result'].length;
+                            for (var i = 0; i < longI; i++) {
+                                var longJ = tasks[i]['customfields'].length;
+                                for (var j = 0; j < longJ; j++) {
+                                    if ((tasks[i]['customfields'][j]['name']) == 'Product Owner') {
+                                        var productOwner = tasks[i]['customfields'][j]['value'];
+                                    }
+                                    else if ((tasks[i]['customfields'][j]['name']) == 'Allocated to') {
+                                        var allocatedTo = tasks[i]['customfields'][j]['value'];
+                                    }
                                 }
-                            ];
-                            myApp.table.rows.add(donnees).draw();
-                            myApp.totalLog += tasks[i]['logedtime'];
-                            var sizeBis=tasks[i]['size'];
-                            myApp.totalSize += Number(sizeBis);
-                            myApp.dataForVBarChart.push(
-                                {
-                                    taskId: tasks[i]['taskid'],
-                                    loggedTime: (tasks[i]['logedtime']).toFixed(2),
-                                    size: tasks[i]['size']
+                                if ((tasks[i]['size'] == null) || (tasks[i]['logedtime'] == null)) {
+                                    var ratio = 0;
                                 }
-                            );
+                                else {
+                                    var ratio = ((tasks[i]['logedtime']) / (tasks[i]['size']) * 100).toFixed(2);
+                                    var donnees = [
+                                        {
+                                            TaskID: tasks[i]['taskid'],
+                                            Title: tasks[i]['title'],
+                                            Assignee: tasks[i]['assignee'],
+                                            Column: tasks[i]['columnname'],
+                                            Lane: tasks[i]['lanename'],
+                                            Size: tasks[i]['size'],
+                                            TimeLogged: tasks[i]['logedtime'],
+                                            Producter: productOwner,
+                                            Allocated: allocatedTo,
+                                            Rapport: ratio
+                                        }
+                                    ];
+                                    myApp.table.rows.add(donnees).draw();
+                                    myApp.totalLog += tasks[i]['logedtime'];
+                                    var sizeBis=tasks[i]['size'];
+                                    myApp.totalSize += Number(sizeBis);
+                                    myApp.dataForVBarChart.push(
+                                        {
+                                            taskId: tasks[i]['taskid'],
+                                            loggedTime: (tasks[i]['logedtime']).toFixed(2),
+                                            size: tasks[i]['size']
+                                        }
+                                    );
+                                }
+                            }
+                            myApp.Vchart = Morris.Bar({
+                                element: 'morris-bar-V-chart',
+                                data: myApp.dataForVBarChart,
+                                xkey: 'taskId',
+                                ykeys: ['loggedTime', 'size'],
+                                labels: ['LoggedTime', 'Size'],
+                                hideHover: 'auto',
+                                resize: true,
+
+                            });
+                            $("#loader").css("display","none");
+                            $('#tableTasks tbody').on('click', 'tr', function () {
+                                myApp.clickTask(myApp.board, myApp.table.row(this).data().TaskID);
+                                $(window).scrollTop(0);
+                            });
+                            myApp.initLoader();
+                            myApp.initAverage();
+                            myApp.showAll();
                         }
                     }
-                    myApp.Vchart = Morris.Bar({
-                        element: 'morris-bar-V-chart',
-                        data: myApp.dataForVBarChart,
-                        xkey: 'taskId',
-                        ykeys: ['loggedTime', 'size'],
-                        labels: ['LoggedTime', 'Size'],
-                        hideHover: 'auto',
-                        resize: true,
 
-                    });
-                    $("#loader").css("display","none");
-                    $('#tableTasks tbody').on('click', 'tr', function () {
-                        myApp.clickTask(myApp.board, myApp.table.row(this).data().TaskID);
-                        $(window).scrollTop(0);
-                    });
-                    myApp.initLoader();
-                    myApp.initAverage();
-                }
+
             }
-        }
-    });
-}; // call à l'API
+        });
+    };// call à l'API
 
 myApp.clearData = function() {
     myApp.table.clear().draw();
@@ -172,6 +181,8 @@ myApp.initAverage = function (){
     {
         $("#bluecircle").append('<span style="color:red;">'+moy+'</span><div class="slice"><div class="bar"></div><div class="fill"></div></div> ');
     }
+    $('#divAverage').css("visibility", "visible");
+
 }; //déclaration de l'average
 
 myApp.initLoader = function (){
@@ -233,6 +244,7 @@ myApp.clickTask = function(board,id) {
                     ],
                     resize: true
                 });
+                $('#donutsChart').css("visibility", "visible");
             }
         }
     });
@@ -251,3 +263,28 @@ myApp.disableCollapse = function(){
     }
 };
 
+myApp.onChangeSelect = function() {
+    if ($('#listeBoard').val() == ("Please select a board.")){
+        $('#listeBoard').css("color","red");
+        myApp.hideAll();
+    }
+    else {
+        $('#listeBoard').css("color","#555");
+        $('#btnValidate').css("visibility", "visible");
+    }
+
+}; //button visible quand select change
+
+myApp.hideAll = function() {
+    $('#btnValidate').css("visibility", "hidden");
+    $('#donutsChart').css("visibility", "hidden");
+    $('#divAverage').css("visibility", "hidden");
+    $('#divTable').css("visibility", "hidden");
+    $('#barVGraph').css("visibility", "hidden");
+}; //cache tout si le select n'est pas bon
+
+myApp.showAll = function(){
+    $('#divAverage').css("visibility", "visible");
+    $('#divTable').css("visibility", "visible");
+    $('#barVGraph').css("visibility", "visible");
+}; //show quand les data sont chargées

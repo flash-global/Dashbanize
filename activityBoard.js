@@ -1,3 +1,7 @@
+$(document).ready(function() {
+    myApp2.hideAll();
+});
+
 var myApp2 = {};
 
 //Déclaration variables//
@@ -120,8 +124,11 @@ myApp2.callAjax = function() {
                     }
                 }
                 $("#loader").css("display","none");
+                myApp2.showAll();
+
                 if (compteur==15){
                     $("#morris-bar-H-chart").css("display","none");
+                    myApp2.hideAll();
                 }
                 else{
                     myApp2.table.rows.add(donnees).draw();
@@ -170,20 +177,20 @@ myApp2.callAjax = function() {
 
                         $("#buttonEmail").css("display","block");
                     }
-
                 }
             }
+
         }
     });
 } // call à l'API
 
 myApp2.initLoader = function (){
     $("#bluecircle").percircle();
-} //déclaration loader
+}; //déclaration loader
 
 myApp2.showPage = function() {
     $("#loader").css("display", "block");
-} // affichage du loader
+}; // affichage du loader
 
 myApp2.clearData = function() {
     myApp2.table.clear().draw();
@@ -192,13 +199,13 @@ myApp2.clearData = function() {
     myApp2.tableBar=[];
     $("#morris-bar-H-chart").empty();
     $("#textModal").empty();
-} // lorsque l'on relance un appel on vide au préalable tableau et graphiques et div
+}; // lorsque l'on relance un appel on vide au préalable tableau et graphiques et div
 
 myApp2.updateValues = function () {
     this.board = $('#listeBoard').val();
     this.fromdate = $("#input1").val();
     this.todate = $("#input2").val();
-} // instensiation des variables à l'appel API
+}; // instensiation des variables à l'appel API
 
 myApp2.sendMail = function (){
     $.ajax({
@@ -229,4 +236,28 @@ myApp2.sendMail = function (){
             }
         }
     });
-}
+};
+
+myApp2.onChangeSelect = function() {
+    if ($('#listeBoard').val() == ("Please select a board.")){
+        $('#listeBoard').css("color","red");
+        myApp2.hideAll();
+    }
+    else {
+        $('#listeBoard').css("color","#555");
+        $('#btnValidate').css("visibility", "visible");
+    }
+
+}; //button visible quand select change
+
+myApp2.hideAll = function() {
+    $('#btnValidate').css("visibility", "hidden");
+    $('#divCard').css("visibility", "hidden");
+    $('#barHGraph').css("visibility", "hidden");
+}; //cache tout si le select n'est pas bon
+
+myApp2.showAll = function(){
+    $('#divAverage').css("visibility", "visible");
+    $('#divCard').css("visibility", "visible");
+    $('#barHGraph').css("visibility", "visible");
+}; //show quand les data sont chargées

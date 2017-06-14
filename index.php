@@ -111,6 +111,7 @@
                     <script>
                         $(function() {
                             $("#datepicker").datepicker({
+                                maxDate: 0,
                                 beforeShowDay: function(date) {
                                     var date1 = $.datepicker.parseDate($.datepicker._defaults.dateFormat, $("#input1").val());
                                     var date2 = $.datepicker.parseDate($.datepicker._defaults.dateFormat, $("#input2").val());
@@ -127,6 +128,9 @@
                                         $("#input2").val(dateText);
                                         $(this).datepicker("option", "minDate", null);
                                     }
+                                    if (($("#input1").val() != '') && ($("#input2").val() != '')) {
+                                        $('#selectBoard').css("visibility", "visible");
+                                    }
                                 }
                             });
                             $.datepicker.setDefaults({
@@ -136,7 +140,9 @@
                     </script>
                 </div>
             </div>
-            <div class="col-lg-3">
+            <div id="loader" style="display:none;"></div>
+
+            <div class="col-lg-3" id="selectBoard" style="visibility: hidden;">
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h3 class="panel-title"><i class="fa fa-caret-square-o-down" aria-hidden="true"></i> Select a board </h3>
@@ -148,7 +154,7 @@
                         $client = new \ProjectPHP\ControllerBoard();
                         $listProject = $client->projectBoard();
                         ?>
-                        <SELECT name='Board' id='listeBoard' class="form-control" >
+                        <SELECT name='Board' id='listeBoard' class="form-control" onchange="myApp.onChangeSelect()">
                             <option>Please select a board.</option>
                             <?php
                             /** @var \ProjectPHP\Project $project */
@@ -162,12 +168,23 @@
                             </SELECT>
                         </div>
                     </div>
-                    <button class="btn btn-xs btn btn-primary" onclick="myApp.callAjax()">
+                    <button id="btnValidate" class="btn btn-xs btn btn-primary" style="visibility: hidden;" onclick="myApp.callAjax()">
                         Validate
                     </button>
                 </div>
 
 
+            <div class="col-lg-2" id="divAverage">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title"><i class="fa fa-circle-o-notch" aria-hidden="true"></i> Average </h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="bluecircle" class="c100 p17 green">
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div id="donutsChart">
                 <div class="col-lg-4">
@@ -182,21 +199,10 @@
                 </div>
             </div>
 
-            <div class="col-lg-2">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title"><i class="fa fa-circle-o-notch" aria-hidden="true"></i> Average </h3>
-                    </div>
-                    <div class="panel-body">
-                        <div id="bluecircle" class="c100 p17 green">
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
         <div id="content">
-            <div class="row" id="divTable">
-                <div class="col-lg-12">
+            <div class="row">
+                <div class="col-lg-12" id="divTable">
                     <div class="panel">
                     <div class="panel panel-default">
                         <div class="panel-heading">
@@ -223,11 +229,11 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div id="loader" style="display:none;"></div>
                     </div>
                 </div>
             </div>
-        </div>
+            </div>
+
 
         <div class="row" id="barVGraph">
             <div class="col-lg-12">

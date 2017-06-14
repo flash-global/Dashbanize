@@ -118,7 +118,7 @@
                         <script>
                             $(function() {
                                 $("#datepicker").datepicker({
-
+                                    maxDate: 0,
                                     beforeShowDay: function(date) {
                                         var date1 = $.datepicker.parseDate($.datepicker._defaults.dateFormat , $("#input1").val());
                                         var date2 = $.datepicker.parseDate($.datepicker._defaults.dateFormat , $("#input2").val());
@@ -135,17 +135,26 @@
                                         } else {
                                             $("#input2").val(dateText);
                                             $(this).datepicker("option", "minDate", null);
+
+
+                                        }
+                                        if (($("#input1").val() != '') && ($("#input2").val() != '')) {
+                                            $('#selectBoard').css("visibility", "visible");
                                         }
                                     }
                                 });
+
                                 $.datepicker.setDefaults({
-                                    dateFormat: 'dd-mm-yy'
+                                    dateFormat: 'dd-mm-yy',
                                 });
                             });
                         </script>
                     </div>
                 </div>
-                <div class="col-lg-3">
+
+                <div id="loader" style="display:none;"></div>
+
+                <div class="col-lg-3" id="selectBoard" style="visibility: hidden;">
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h3 class="panel-title"><i class="fa fa-caret-square-o-down" aria-hidden="true"></i> Select a board </h3>
@@ -157,7 +166,7 @@
                             $client = new \ProjectPHP\ControllerBoard();
                             $listProject = $client->projectBoard();
                             ?>
-                            <SELECT name='Board' id='listeBoard' class="form-control">
+                            <SELECT name='Board' id='listeBoard' class="form-control" onchange="myApp2.onChangeSelect()">
                                 <option>Please select a board.</option>
                                 <?php
                                 /** @var \ProjectPHP\Project $project */
@@ -171,13 +180,13 @@
                             </SELECT>
                         </div>
                     </div>
-                    <button class="btn btn-xs btn btn-primary" onclick="myApp2.callAjax()">
+                    <button id="btnValidate" class="btn btn-xs btn btn-primary" style="visibility: hidden;" onclick="myApp2.callAjax()">
                         Validate
                     </button>
                 </div>
             </div>
             <!-- /.row -->
-            <div class="row">
+            <div class="row" id="barHGraph">
                 <div class="col-lg-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
