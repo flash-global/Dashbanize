@@ -24,7 +24,7 @@ class callMailGun
             'from'    => 'Dashboard <mailgun@sandbox3dfd3fc5cd324019a41b576cc47bc7e8.mailgun.org>',
             'to'      => 'Emelyne <'.$config['MAIL'].'>',
             'subject' => 'Report data from '.$fromdate.' to '.$todate.' for board n° '.$board,
-            'text'    => $table
+            'html'    => $table,
         ));
         return $result;
     }

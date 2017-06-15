@@ -208,13 +208,24 @@ myApp2.updateValues = function () {
 }; // instensiation des variables à l'appel API
 
 myApp2.sendMail = function (){
+    var tableau;
+    tableau = '<html><table><thead><th>Assignee</th><th>LoggedTime</th></thead><tbody>';
+    myApp2.tableBar.forEach(function (value) {
+
+        tableau += '<tr><td> ' + value.assignee + ' </td>';
+        tableau += '<td> ' + value.loggedTime + ' </td></tr>';
+
+    });
+    tableau += '</tbody></table></html>';
+    console.log(tableau);
     $.ajax({
         type: 'POST',
         url: 'ajax.php',
         data:{
+            dataType : 'html',
             action : 'sendEmail',
             board : myApp2.board,
-            loggedTime : JSON.stringify(myApp2.tableBar),
+            loggedTime : tableau,
             fromdate : myApp2.fromdate,
             todate : myApp2.todate
         },
